@@ -1,5 +1,9 @@
 class AppConfig {
-  static const String environment = "local";
+  static const String appName = "Evolve Home";
+
+  // static const String environment = "local";
+  static const String environment =
+      String.fromEnvironment("ENV", defaultValue: "dev");
 
   static String get baseUrl {
     switch (environment) {

@@ -13,7 +13,7 @@ class ApiService {
   // If using real device: replace with your host IP
 
   Future<(bool, String, UserDTO?)> login(String username, String password) async {
-    debugPrint("➡️ Attempting login for user: $username");
+    debugPrint("Attempting login for user: $username");
 
     try {
       final response = await http.post(
@@ -33,7 +33,7 @@ class ApiService {
         await prefs.setString("authToken", user.token);
         await prefs.setString("userInfo", jsonEncode(user.toJson()));
 
-        debugPrint("✅ Login Successful: ${user.userName}");
+        debugPrint(" Login Successful: ${user.userName}");
         return (true, "Welcome ${user.shortName}", user);
       } else {
         String message = "Login failed";
