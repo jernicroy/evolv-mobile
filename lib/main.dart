@@ -1,7 +1,7 @@
-import 'package:evolv_mobile/services/app_routes.dart';
+import 'package:evolv_mobile/core/services/app_routes.dart';
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
+import 'app/screens/login_screen.dart';
+import 'app/screens/home_screen.dart';
 
 void main() {
   runApp(MyApp());

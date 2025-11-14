@@ -1,8 +1,14 @@
-import 'package:evolv_mobile/services/app_routes.dart';
-import 'package:evolv_mobile/services/login_service.dart';
+import 'dart:convert';
+
+import 'package:evolv_mobile/app/theme/app_theme.dart';
+import 'package:evolv_mobile/core/services/app_routes.dart';
+import 'package:evolv_mobile/core/services/login_service.dart';
+import 'package:evolv_mobile/core/utils/app_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
-import '../services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/dto/user_info_dto.dart';
+import '../../core/services/api_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,9 +21,14 @@ class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _apiService = ApiService();
+  UserDTO? user;
   bool _loading = false;
   bool biometricAvailable = false;
   final LocalAuthentication auth = LocalAuthentication();
+  MaterialColor primaryColor = AppTheme.primaryColor;
+  MaterialColor primarySubColor = AppTheme.primarySubColor;
+  MaterialAccentColor primaryColorAccent = AppTheme.primaryColorAccent;
+  Color backgroundColor = AppTheme.backgroundColor;
 
   @override
   void initState() {
@@ -49,9 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (success && user != null) {
       LoggedInUser.user = user;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Welcome ${user.shortName}!")),
-      );
+      AppNotifications.showToast('Welcome ${user.shortName}');
 
       Navigator.pushReplacementNamed(
         context,
@@ -59,9 +68,15 @@ class _LoginScreenState extends State<LoginScreen> {
         arguments: user.shortName,
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
+       AppNotifications.showAlertDialog(
+        context,
+        "Login Failed!",
+        message,
       );
+
+      // ScaffoldMessenger.of(
+      //   context,
+      // ).showSnackBar(SnackBar(content: Text(message)));
     }
 
     debugPrint("Login result: $message");
@@ -72,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.backgroundColor,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
@@ -84,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 "Welcome to",
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent,
+                  color: primaryColorAccent,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -100,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Text(
                 "Sign in to continue",
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[700],
+                  color: primarySubColor[700],
                 ),
               ),
               const SizedBox(height: 40),
@@ -138,25 +153,25 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: ElevatedButton(
                   onPressed: _loading ? null : _login,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
+                    backgroundColor: primaryColorAccent,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   child: _loading
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                            color: Colors.white,
+                            color: backgroundColor,
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text(
+                      : Text(
                           "Login",
                           style: TextStyle(
-                            color: Colors.white,
+                            color: backgroundColor,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -167,14 +182,14 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 25),
 
               Spacer(),
-              if(biometricAvailable)
+              if (biometricAvailable)
                 Column(
                   children: [
-                    Text('or', style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey
-                    ),),
-                    SizedBox(height: 10,),
+                    Text(
+                      'or',
+                      style: TextStyle(fontSize: 18, color: primarySubColor),
+                    ),
+                    SizedBox(height: 10),
                     InkWell(
                       onTap: _loading ? null : _biometricAuthentication,
                       borderRadius: BorderRadius.circular(30),
@@ -182,20 +197,20 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          color: Colors.blue[50],
+                          color: primaryColor[50],
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.blue[200]!),
+                          border: Border.all(color: primaryColor[200]!),
                         ),
                         child: _loading
                             ? CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.blue,
+                                  primaryColor,
                                 ),
                               )
                             : Icon(
                                 Icons.fingerprint,
-                                color: Colors.blue[600],
+                                color: primaryColor[600],
                                 size: 47,
                               ),
                       ),
@@ -203,16 +218,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     SizedBox(height: 25),
                     Text(
                       'Login with Biometrics',
-                      style: TextStyle(fontSize: 18, color: Colors.blue[600]),
+                      style: TextStyle(fontSize: 18, color: primaryColor[600]),
                     ),
-                    SizedBox(height: 10),
+                    SizedBox(height: 25),
                   ],
                 ),
 
-              // Footer (optional)
+              // Footer
               Text(
                 "© 2025 Evolv Mobile App",
-                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                style: TextStyle(color: primarySubColor[600], fontSize: 12),
               ),
             ],
           ),
@@ -223,42 +238,76 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _biometricAuthentication() async {
     debugPrint("Biometric authentication tapped");
-    if(!biometricAvailable){
+    await _loadUserFromPrefs();
+    if (user == null) {
       return;
     }
-    setState(() {
-      _loading = true;
-    });
+    if (!biometricAvailable) {
+      if (!mounted) return;
+       AppNotifications.showAlertDialog(
+        context,
+        "Unable to Authenticate",
+        "Biometric authentication not available on this device.",
+      );
+      return;
+    }
 
-    try{
-      bool authenticate = await auth.authenticate(localizedReason: 'Please authenticate to login',
+    try {
+      bool authenticate = await auth.authenticate(
+        localizedReason: 'Please authenticate to Evolve Home',
         options: const AuthenticationOptions(
           stickyAuth: true,
-          biometricOnly: true,
+          biometricOnly: false,
         ),
       );
-      String dummyUserName = "Jernic Roy - Biometric";
+
       if (!mounted) return;
 
-      if(authenticate){
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Welcome $dummyUserName')),
-        );
+      if (authenticate) {
+        AppNotifications.showToast('Welcome ${user?.shortName}');
+
         Navigator.pushReplacementNamed(
           context,
           AppRoutes.home,
-          arguments: dummyUserName,
+          arguments: user?.shortName,
         );
       }
-    } catch(e){
+    } catch (e) {
       print(e.toString());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+      AppNotifications.showAlertDialog(
+        context,
+        "Unable to Authenticate",
+        e.toString(),
       );
+
     } finally {
       setState(() {
         _loading = false;
       });
     }
+  }
+
+  Future<void> _loadUserFromPrefs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userJson = prefs.getString("userInfo");
+
+    if (userJson == null) {
+      if (!mounted) return;
+
+      AppNotifications.showAlertDialog(
+        context,
+        "Session Not Available",
+        "Please login first to access Evolve Home.",
+        onConfirm: () {
+          return;
+        },
+      );
+      return;
+    }
+
+    setState(() {
+      user = UserDTO.fromJson(jsonDecode(userJson));
+      _loading = false;
+    });
   }
 }

@@ -1,4 +1,4 @@
-import 'package:evolv_mobile/dto/user_info_dto.dart';
+import 'package:evolv_mobile/core/dto/user_info_dto.dart';
 
 class LoggedInUser {
   static UserDTO? _user;

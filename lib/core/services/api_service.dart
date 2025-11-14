@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:evolv_mobile/config/app_config.dart';
-import 'package:evolv_mobile/dto/user_info_dto.dart';
+import 'package:evolv_mobile/app/config/app_config.dart';
+import 'package:evolv_mobile/core/dto/user_info_dto.dart';
+import 'package:evolv_mobile/core/services/app_routes.dart';
+import 'package:evolv_mobile/core/services/login_service.dart';
+import 'package:evolv_mobile/core/utils/app_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -81,5 +84,26 @@ class ApiService {
       print('Failed to fetch profile: ${response.statusCode}');
       return null;
     }
+  }
+
+  void logout(context) async {
+    AppNotifications.showConfirmDialog(
+      context,
+      title: "Logout!",
+      message: "Are you sure you want to logout?",
+      confirmText: "Logout",
+      onConfirm: () async {
+        LoggedInUser.logout();
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.clear();
+
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.login,
+          (route) => false,
+        );
+      },
+    );
   }
 }

@@ -1,9 +1,11 @@
 import 'dart:convert';
 
-import 'package:evolv_mobile/config/app_config.dart';
-import 'package:evolv_mobile/dto/user_info_dto.dart';
-import 'package:evolv_mobile/services/app_routes.dart';
-import 'package:evolv_mobile/services/login_service.dart';
+import 'package:evolv_mobile/app/config/app_config.dart';
+import 'package:evolv_mobile/app/theme/app_theme.dart';
+import 'package:evolv_mobile/core/dto/user_info_dto.dart';
+import 'package:evolv_mobile/core/services/api_service.dart';
+import 'package:evolv_mobile/core/services/app_routes.dart';
+import 'package:evolv_mobile/core/utils/app_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,7 +19,9 @@ class _HomeScreenState extends State<HomeScreen> {
   UserDTO? user;
   int _selectedIndex = 0;
   bool _loading = true;
-  Color primaryColor = const Color.fromARGB(255, 255, 243, 255);
+  final _apiService = ApiService();
+
+  // Color primaryColor = const Color.fromARGB(255, 252, 247, 252);
   
   // Titles for top panel based on active tab
   final List<String> _titles = [
@@ -45,7 +49,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final userJson = prefs.getString("userInfo");
     if (userJson == null) {
       if (!mounted) return;
-      Navigator.pushReplacementNamed(context, AppRoutes.login);
+      AppNotifications.showAlertDialog(
+        context,
+        "Session Not Available",
+        "Please login first to access Evolve Home.",
+        onConfirm: () {
+          Navigator.pushReplacementNamed(context, AppRoutes.login);
+        },
+      );
       return;
     }
 
@@ -103,13 +114,13 @@ class _HomeScreenState extends State<HomeScreen> {
       // appBar: AppBar(
       //   title: Text("Evolve Home | ${user!.shortName}"),
       // ),
-      backgroundColor: primaryColor,
+      backgroundColor: AppTheme.primarySubColor[50]!,
       body: Column(
         children: [
-          // 🔹 Static Top Panel
+          // Static Top Panel
           Container(
             width: double.infinity,
-            color: Colors.blue,
+            color: AppTheme.primaryColor,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: SafeArea(
               bottom: false,
@@ -117,10 +128,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // Left: Static app name
-                  const Text(
+                  Text(
                     AppConfig.appName,
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.backgroundColor,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -133,8 +144,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         _titles[_selectedIndex].isEmpty
                             ? ""
                             : _titles[_selectedIndex],
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: AppTheme.backgroundColor,
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
                         ),
@@ -145,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   // Right: User dropdown menu
                   PopupMenuButton<String>(
-                    color: primaryColor,
+                    color: AppTheme.primarySubColor[50]!,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -153,20 +164,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: EdgeInsets.zero, // removes extra outer padding
                     onSelected: (value) {
                       if (value == 'role') {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Role: ${user?.role ?? "N/A"}')),
-                        );
+                        AppNotifications.showToast("Role: ${user?.role ?? "N/A"}");
                       } else if (value == 'change_password') {
                         // Navigate to Change Password Page
                         Navigator.pushNamed(context, AppRoutes.changePassword);
                       } else if (value == 'logout') {
                         if (!mounted) return;
-                        LoggedInUser.logout();
-                        SharedPreferences.getInstance().then((prefs) {
-                          prefs.clear();
-                          Navigator.pushReplacementNamed(context, AppRoutes.login);
-                        });
-                        Navigator.pushNamed(context, AppRoutes.login);
+                        _apiService.logout(context);
                       }
                     },
                     itemBuilder: (context) => [
@@ -175,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         value: 'role',
                         child: Row(
                           children: [
-                            const Icon(Icons.badge, color: Colors.blue),
+                            Icon(Icons.badge, color: AppTheme.primaryColor),
                             const SizedBox(width: 6),
                             Text(
                               'Role: ${user?.role ?? "N/A"}',
@@ -185,24 +189,24 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const PopupMenuDivider(height: 6),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         height: 32,
                         value: 'change_password',
                         child: Row(
                           children: [
-                            Icon(Icons.lock_outline, color: Colors.blue),
+                            Icon(Icons.lock_outline, color: AppTheme.primaryColor),
                             SizedBox(width: 6),
                             Text('Change Password'),
                           ],
                         ),
                       ),
                       const PopupMenuDivider(height: 6),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         height: 32,
                         value: 'logout',
                         child: Row(
                           children: [
-                            Icon(Icons.login_outlined, color: Colors.blue),
+                            Icon(Icons.login_outlined, color: AppTheme.primaryColor),
                             SizedBox(width: 6),
                             Text('Logout'),
                           ],
@@ -211,16 +215,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                     child: Row(
                       children: [
-                        const Icon(Icons.account_circle, color: Colors.white, size: 26),
+                        Icon(Icons.account_circle, color: AppTheme.backgroundColor, size: 26),
                         const SizedBox(width: 6),
                         Text(
                           user?.shortName ?? "",
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: AppTheme.backgroundColor,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const Icon(Icons.arrow_drop_down, color: Colors.white),
+                        Icon(Icons.arrow_drop_down, color: AppTheme.backgroundColor),
                       ],
                     ),
                   ),
