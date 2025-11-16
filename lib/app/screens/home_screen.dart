@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:evolv_mobile/app/config/app_config.dart';
-import 'package:evolv_mobile/app/theme/app_theme.dart';
+import 'package:evolv_mobile/app/screens/family/family_list.dart';
 import 'package:evolv_mobile/core/dto/user_info_dto.dart';
 import 'package:evolv_mobile/core/services/api_service.dart';
 import 'package:evolv_mobile/core/services/app_routes.dart';
@@ -10,7 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.onThemeChanged});
+  final VoidCallback? onThemeChanged;
+
   @override
   // ignore: library_private_types_in_public_api
   _HomeScreenState createState() => _HomeScreenState();
@@ -33,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _pages = [
     Center(child: Text("Me")),        // Me tab
-    Center(child: Text("Family")),    // Family tab
+    FamilyListScreen(),               // Family tab
     Container(),                      // Placeholder for Add roll-up
     Center(child: Text("Settings")),  // Settings tab
   ];
@@ -111,16 +113,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text("Evolve Home | ${user!.shortName}"),
-      // ),
-      backgroundColor: AppTheme.primarySubColor[50]!,
       body: Column(
         children: [
           // Static Top Panel
           Container(
             width: double.infinity,
-            color: AppTheme.primaryColor,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: SafeArea(
               bottom: false,
@@ -131,7 +128,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     AppConfig.appName,
                     style: TextStyle(
-                      color: AppTheme.backgroundColor,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -145,7 +141,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             ? ""
                             : _titles[_selectedIndex],
                         style: TextStyle(
-                          color: AppTheme.backgroundColor,
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
                         ),
@@ -156,12 +151,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   // Right: User dropdown menu
                   PopupMenuButton<String>(
-                    color: AppTheme.primarySubColor[50]!,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     offset: const Offset(0, 36),
-                    padding: EdgeInsets.zero, // removes extra outer padding
+                    padding: EdgeInsets.zero,
                     onSelected: (value) {
                       if (value == 'role') {
                         AppNotifications.showToast("Role: ${user?.role ?? "N/A"}");
@@ -171,15 +165,34 @@ class _HomeScreenState extends State<HomeScreen> {
                       } else if (value == 'logout') {
                         if (!mounted) return;
                         _apiService.logout(context);
+                      } else if (value == 'theme_change') {
+                        if (widget.onThemeChanged != null) {
+                          widget.onThemeChanged!();
+                        }
                       }
                     },
                     itemBuilder: (context) => [
                       PopupMenuItem(
                         height: 32,
+                        value: 'theme_change',
+                        child: Row(
+                          children: [
+                            Icon(Icons.color_lens_outlined),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Switch Theme',
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuDivider(height: 6),
+                      PopupMenuItem(
+                        height: 32,
                         value: 'role',
                         child: Row(
                           children: [
-                            Icon(Icons.badge, color: AppTheme.primaryColor),
+                            Icon(Icons.badge),
                             const SizedBox(width: 6),
                             Text(
                               'Role: ${user?.role ?? "N/A"}',
@@ -194,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         value: 'change_password',
                         child: Row(
                           children: [
-                            Icon(Icons.lock_outline, color: AppTheme.primaryColor),
+                            Icon(Icons.lock_outline),
                             SizedBox(width: 6),
                             Text('Change Password'),
                           ],
@@ -206,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         value: 'logout',
                         child: Row(
                           children: [
-                            Icon(Icons.login_outlined, color: AppTheme.primaryColor),
+                            Icon(Icons.login_outlined),
                             SizedBox(width: 6),
                             Text('Logout'),
                           ],
@@ -215,16 +228,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                     child: Row(
                       children: [
-                        Icon(Icons.account_circle, color: AppTheme.backgroundColor, size: 26),
+                        Icon(Icons.account_circle, size: 26),
                         const SizedBox(width: 6),
                         Text(
                           user?.shortName ?? "",
                           style: TextStyle(
-                            color: AppTheme.backgroundColor,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Icon(Icons.arrow_drop_down, color: AppTheme.backgroundColor),
+                        Icon(Icons.arrow_drop_down),
                       ],
                     ),
                   ),

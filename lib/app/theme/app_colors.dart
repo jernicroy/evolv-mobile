@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 
-class AppTheme {
+class AppColors {
   static MaterialColor primaryColor = Colors.blue;
   static MaterialColor primarySubColor = Colors.grey;
   static MaterialColor notificationBgColor = Colors.blueGrey;

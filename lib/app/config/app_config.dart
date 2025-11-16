@@ -1,5 +1,6 @@
 class AppConfig {
   static const String appName = "Evolve Home";
+  final String appVersion = "1.0.0";
 
   // static const String environment = "local";
   static const String environment =

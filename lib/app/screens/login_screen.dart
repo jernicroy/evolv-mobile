@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:evolv_mobile/app/theme/app_theme.dart';
+import 'package:evolv_mobile/app/theme/app_colors.dart';
 import 'package:evolv_mobile/core/services/app_routes.dart';
 import 'package:evolv_mobile/core/services/login_service.dart';
 import 'package:evolv_mobile/core/utils/app_notifications.dart';
@@ -25,10 +25,10 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _loading = false;
   bool biometricAvailable = false;
   final LocalAuthentication auth = LocalAuthentication();
-  MaterialColor primaryColor = AppTheme.primaryColor;
-  MaterialColor primarySubColor = AppTheme.primarySubColor;
-  MaterialAccentColor primaryColorAccent = AppTheme.primaryColorAccent;
-  Color backgroundColor = AppTheme.backgroundColor;
+  MaterialColor primaryColor = AppColors.primaryColor;
+  MaterialColor primarySubColor = AppColors.primarySubColor;
+  MaterialAccentColor primaryColorAccent = AppColors.primaryColorAccent;
+  Color backgroundColor = AppColors.backgroundColor;
 
   @override
   void initState() {
@@ -87,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: AppColors.backgroundColor,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
@@ -126,6 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.person_outline),
                   labelText: "Username",
+                  fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -138,6 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
+                  fillColor: Colors.white,
                   prefixIcon: const Icon(Icons.lock_outline),
                   labelText: "Password",
                   border: OutlineInputBorder(
